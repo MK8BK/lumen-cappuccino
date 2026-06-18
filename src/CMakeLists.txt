@@ -7,10 +7,14 @@ add_executable(log log.cpp)
 target_link_libraries(log PRIVATE spdlog::spdlog)
 
 add_executable(${PROJECT_NAME} main.cpp Controller.cpp Model.cpp View.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(${PROJECT_NAME} PRIVATE sdl::sdl SDL3_image::SDL3_image)
 target_link_libraries(${PROJECT_NAME} PRIVATE strict_compile_flags) # always strict
+target_link_libraries(${PROJECT_NAME} PRIVATE profiling_flags)
+target_link_libraries(${PROJECT_NAME} PRIVATE optimized2_compile_flags)
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:LUMEN_LOG>
+    $<$<CONFIG:Debug>:LUMEN_STRICT_CHECKS>
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:spdlog::spdlog>

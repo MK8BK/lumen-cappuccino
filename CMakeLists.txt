@@ -3,6 +3,7 @@ project(lumen_cappuccino CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
 
 # thanks ConanCenter
@@ -30,6 +31,20 @@ else()
     -Werror
   )
 endif()
+
+add_library(optimized2_compile_flags INTERFACE)
+if(MSVC)
+  target_compile_options(optimized2_compile_flags INTERFACE /O2)
+else()
+  target_compile_options(optimized2_compile_flags INTERFACE -O2)
+endif()
+
+add_library(profiling_flags INTERFACE)
+if(NOT MSVC)
+  target_compile_options(profiling_flags INTERFACE -pg)
+  target_link_options(profiling_flags INTERFACE -pg)
+endif()
+
 
 add_subdirectory(src)
 
