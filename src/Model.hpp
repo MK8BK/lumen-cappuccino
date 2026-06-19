@@ -4,6 +4,11 @@
 #include <chrono>
 #include <optional>
 #include <variant>
+#ifdef LUMEN_LOG
+#  include <spdlog/spdlog.h>
+#endif
+
+#define MAX_TIME_MILLISECONDS 43000.0
 
 namespace LumenCappuccino {
 
@@ -19,10 +24,17 @@ class DELETED {};
 using Tile = std::variant<COFFEE_BEAN, COCOA_BEAN, CAPPUCCINO, ESPRESSO,
                           MACHIATTO, GREEN_TEA, HIDDEN, DELETED>;
 class Model {
-private:
-  std::array<std::array<Tile, 4>, 3> tiles;
+public:
   using Clock = std::chrono::system_clock;
   using TimePoint = Clock::time_point;
+
+private:
+  /**
+   * small enough size that it's more efficient to just do a linear search
+   * instead of an unordered_set
+   */
+  std::array<std::array<Tile, 4>, 3> shownTiles;
+  std::array<std::array<Tile, 4>, 3> realTiles;
   std::optional<TimePoint> gameStartTime;
 
 public:
@@ -35,6 +47,7 @@ public:
   bool isGameLost() const;
   std::optional<Tile> getTile(int row, int column) const;
   std::optional<Tile> uncoverTile(int row, int column) const;
+  std::optional<TimePoint> getStartTime() const;
 };
 
 } // namespace LumenCappuccino

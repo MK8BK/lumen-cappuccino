@@ -1,6 +1,5 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
 #include "Model.hpp"
+#include <doctest/doctest.h>
 
-TEST_CASE("") {
-}
+TEST_CASE("") {}
