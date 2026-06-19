@@ -17,11 +17,11 @@ using namespace LumenCappuccino;
 SDL_AppResult SDL_AppInit(void **appstate, int argc, [[maybe_unused]] char *argv[])
 {
     #ifdef LUMEN_LOG
-    spdlog::info("Welcome");
+    spdlog::info("Welcome to debug mode with spdlog and all the logging flags enabled");
     #endif
     if(argc>1){
         #ifdef LUMEN_LOG
-            spdlog::warn("Game takes no flags: %s ...", argv[1]);
+        spdlog::warn("Game takes no flags: {} ...", argv[1]);
         #endif
         // ignore for now
         // return SDL_APP_FAILURE;
@@ -54,7 +54,6 @@ SDL_AppResult SDL_AppIterate(void *appstate)
             return SDL_APP_FAILURE;
         }
     #endif
-
     return controller->render();
 }
 

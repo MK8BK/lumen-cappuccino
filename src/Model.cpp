@@ -1,13 +1,18 @@
 #include "Model.hpp"
 
 namespace LumenCappuccino {
-Model::Model() : tiles() {
-   for(auto& row : tiles)
-    for(Tile& tile : row)
-        tile = HIDDEN{};
+Model::Model() : tiles(), gameStartTime() {
+  for (auto& row : tiles)
+    for (Tile& tile : row)
+      tile = HIDDEN{};
 }
 bool Model::setup() { return true; }
-bool Model::startGame() { return true; }
+
+bool Model::isGameStarted() const { return gameStartTime.has_value(); }
+bool Model::startGame() {
+  gameStartTime = Clock::now();
+  return true;
+}
 bool Model::isGameOver() const { return false; }
 bool Model::isGameWon() const { return false; }
 bool Model::isGameLost() const { return false; }

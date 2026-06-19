@@ -20,12 +20,16 @@ using Tile = std::variant<COFFEE_BEAN, COCOA_BEAN, CAPPUCCINO, ESPRESSO,
                           MACHIATTO, GREEN_TEA, HIDDEN, DELETED>;
 class Model {
 private:
-    std::array<std::array<Tile, 4>, 3> tiles;
-    std::chrono::time_point<std::chrono::system_clock> gameStartTime;
+  std::array<std::array<Tile, 4>, 3> tiles;
+  using Clock = std::chrono::system_clock;
+  using TimePoint = Clock::time_point;
+  std::optional<TimePoint> gameStartTime;
+
 public:
   Model();
   bool setup();
   bool startGame();
+  bool isGameStarted() const;
   bool isGameOver() const;
   bool isGameWon() const;
   bool isGameLost() const;

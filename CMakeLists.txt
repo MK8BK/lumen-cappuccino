@@ -32,19 +32,17 @@ else()
   )
 endif()
 
-add_library(optimized2_compile_flags INTERFACE)
-if(MSVC)
-  target_compile_options(optimized2_compile_flags INTERFACE /O2)
-else()
-  target_compile_options(optimized2_compile_flags INTERFACE -O2)
-endif()
 
-add_library(profiling_flags INTERFACE)
-if(NOT MSVC)
-  target_compile_options(profiling_flags INTERFACE -pg)
-  target_link_options(profiling_flags INTERFACE -pg)
-endif()
+function(add_gnu_flag_target target flag)
+  add_library(${target} INTERFACE)
+  if(NOT MSVC)
+    target_compile_options(${target} INTERFACE ${flag})
+    target_link_options(${target} INTERFACE ${flag})
+  endif()
+endfunction()
 
+add_gnu_flag_target(profiling_flags -pg)
+add_gnu_flag_target(debugging_flags -g)
 
 add_subdirectory(src)
 
