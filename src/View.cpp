@@ -136,8 +136,8 @@ bool View::setup() {
     valid = false;
     return valid;
   }
-  wonTextPosition.x = square_side;
-  wonTextPosition.y = square_side;
+  wonTextPosition.x = static_cast<float>(square_side);
+  wonTextPosition.y = static_cast<float>(square_side);
   SDL_DestroySurface(wonSurface);
 
   SDL_Surface* lostSurface =
@@ -165,8 +165,8 @@ bool View::setup() {
     valid = false;
     return valid;
   }
-  lostTextPosition.x = square_side;
-  lostTextPosition.y = square_side;
+  lostTextPosition.x = static_cast<float>(square_side);
+  lostTextPosition.y = static_cast<float>(square_side);
   SDL_DestroySurface(lostSurface);
 
   SDL_Surface* introSurface =
@@ -194,8 +194,8 @@ bool View::setup() {
     valid = false;
     return valid;
   }
-  introTextPosition.x = square_side;
-  introTextPosition.y = square_side;
+  introTextPosition.x = static_cast<float>(square_side);
+  introTextPosition.y = static_cast<float>(square_side);
   SDL_DestroySurface(introSurface);
 
   return valid;

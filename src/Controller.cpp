@@ -63,7 +63,8 @@ void Controller::handleMouseDown(SDL_MouseButtonEvent* buttonEvent) {
 #ifdef LUMEN_LOG
   // spdlog::info("{} {} {}", x, y, buttonEvent->timestamp);
 #endif
-  std::optional<std::pair<int, int>> clickedTilePosition{view.getTile(x, y)};
+  std::optional<std::pair<int, int>> clickedTilePosition{
+      view.getTile(static_cast<int>(x), static_cast<int>(y))};
   if (!clickedTilePosition) {
     return;
   }
