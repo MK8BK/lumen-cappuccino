@@ -14,13 +14,10 @@ cmake --preset conan-release
 cmake --build --preset conan-release
 
 # to run the game
+cd assets
+
 ./build/build/Release/src/lumen-cappucino
 # or on wayland gnome if no borders
 SDL_VIDEODRIVER=x11 ./build/build/Release/src/lumen-cappucino
-
-# for testing
-ctest --test-dir build/build/Release/src
-
-
 
 ```
