@@ -4,6 +4,7 @@
 #include "MusicPlayer.hpp"
 #include "View.hpp"
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_keycode.h>
 
@@ -16,12 +17,13 @@ private:
   Model model;
   MusicPlayer musicPlayer;
   SDL_AppResult handleKey(SDL_Keycode key);
+  void handleMouseDown(SDL_MouseButtonEvent* buttonEvent);
 
 public:
   Controller();
   SDL_AppResult handleEvent(SDL_Event* event);
   bool isValid() const;
-  SDL_AppResult render() const;
+  SDL_AppResult render();
 };
 
 } // namespace LumenCappuccino

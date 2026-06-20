@@ -23,6 +23,7 @@ class DELETED {};
 
 using Tile = std::variant<COFFEE_BEAN, COCOA_BEAN, CAPPUCCINO, ESPRESSO,
                           MACHIATTO, GREEN_TEA, HIDDEN, DELETED>;
+
 class Model {
 public:
   using Clock = std::chrono::system_clock;
@@ -36,6 +37,7 @@ private:
   std::array<std::array<Tile, 4>, 3> shownTiles;
   std::array<std::array<Tile, 4>, 3> realTiles;
   std::optional<TimePoint> gameStartTime;
+  bool gameWon;
 
 public:
   Model();
@@ -46,8 +48,9 @@ public:
   bool isGameWon() const;
   bool isGameLost() const;
   std::optional<Tile> getTile(int row, int column) const;
-  std::optional<Tile> uncoverTile(int row, int column) const;
-  std::optional<TimePoint> getStartTime() const;
+  void uncoverTile(int row, int column);
+  // std::optional<TimePoint> getStartTime() const;
+  float getTimerPercent() const;
 };
 
 } // namespace LumenCappuccino

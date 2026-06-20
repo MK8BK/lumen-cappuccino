@@ -7,8 +7,10 @@
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <variant>
 
 #ifdef LUMEN_LOG
@@ -17,10 +19,14 @@
 
 namespace LumenCappuccino {
 View::View()
-    : valid(true), height(), width(), square_side(), square_gap(), window(),
-      renderer(nullptr), lumenTexture(nullptr), coffeeBeanTexture(),
-      cocoaBeanTexture(), espressoTexture(), machiattoTexture(),
-      greenTeaTexture(), cappuccinoTexture() {}
+    : valid(true), height(), width(), square_side(), square_gap(),
+      window(nullptr), renderer(nullptr), lumenTexture(nullptr),
+      coffeeBeanTexture(nullptr), cocoaBeanTexture(nullptr),
+      espressoTexture(nullptr), machiattoTexture(nullptr),
+      greenTeaTexture(nullptr), cappuccinoTexture(nullptr), font(nullptr),
+      wonTextTexture(nullptr), lostTextTexture(nullptr),
+      introTextTexture(nullptr), wonTextPosition(), lostTextPosition(),
+      introTextPosition() {}
 
 bool View::isValid() const { return valid; }
 
@@ -77,6 +83,7 @@ bool View::setup() {
     valid = false;
     return valid;
   }
+
   if (!loadTexture(LUMEN_PICTURE_FILE, &lumenTexture) ||
       !loadTexture(COFFEEBEAN_PICTURE_FILE, &coffeeBeanTexture) ||
       !loadTexture(COCOABEAN_PICTURE_FILE, &cocoaBeanTexture) ||
@@ -85,7 +92,130 @@ bool View::setup() {
       !loadTexture(MACHIATTO_PICTURE_FILE, &machiattoTexture) ||
       !loadTexture(CAPPUCCINO_PICTURE_FILE, &cappuccinoTexture)) [[unlikely]]
     return valid; // valid was already set to false
+
+  if (!TTF_Init()) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't initialize text rendering system: {}",
+                  SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+
+  font = TTF_OpenFont(FONT_FILENAME, 32);
+  if (!font) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't load font: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+
+  SDL_Surface* wonSurface =
+      TTF_RenderText_Blended(font, WINNING_TEXT, 0, GREEN_FOREGROUND);
+  if (!wonSurface) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't render text to surface: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  wonTextTexture = SDL_CreateTextureFromSurface(renderer, wonSurface);
+  if (!wonTextTexture) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't render text to texture: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  if (!SDL_GetTextureSize(wonTextTexture, &wonTextPosition.w,
+                          &wonTextPosition.h)) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't get texture size: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  wonTextPosition.x = square_side;
+  wonTextPosition.y = square_side;
+  SDL_DestroySurface(wonSurface);
+
+  SDL_Surface* lostSurface =
+      TTF_RenderText_Blended(font, LOSING_TEXT, 0, RED_FOREGROUND);
+  if (!lostSurface) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't render text to surface: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  lostTextTexture = SDL_CreateTextureFromSurface(renderer, lostSurface);
+  if (!lostTextTexture) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't render text to texture: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  if (!SDL_GetTextureSize(lostTextTexture, &lostTextPosition.w,
+                          &lostTextPosition.h)) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't get texture size: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  lostTextPosition.x = square_side;
+  lostTextPosition.y = square_side;
+  SDL_DestroySurface(lostSurface);
+
+  SDL_Surface* introSurface =
+      TTF_RenderText_Blended(font, INTRO_TEXT, 0, BLACK_FOREGROUND);
+  if (!introSurface) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't render text to surface: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  introTextTexture = SDL_CreateTextureFromSurface(renderer, introSurface);
+  if (!introTextTexture) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't render text to texture: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  if (!SDL_GetTextureSize(introTextTexture, &introTextPosition.w,
+                          &introTextPosition.h)) [[unlikely]] {
+#ifdef LUMEN_LOG
+    spdlog::error("Couldn't get texture size: {}", SDL_GetError());
+#endif
+    valid = false;
+    return valid;
+  }
+  introTextPosition.x = square_side;
+  introTextPosition.y = square_side;
+  SDL_DestroySurface(introSurface);
+
   return valid;
+}
+
+View::~View() {
+  SDL_DestroyTexture(cappuccinoTexture);
+  SDL_DestroyTexture(coffeeBeanTexture);
+  SDL_DestroyTexture(machiattoTexture);
+  SDL_DestroyTexture(espressoTexture);
+  SDL_DestroyTexture(greenTeaTexture);
+  SDL_DestroyTexture(cocoaBeanTexture);
+  SDL_DestroyTexture(lumenTexture);
+  SDL_DestroyTexture(wonTextTexture);
+  SDL_DestroyTexture(lostTextTexture);
+  SDL_DestroyTexture(introTextTexture);
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  TTF_CloseFont(font);
+  TTF_Quit();
 }
 
 bool View::loadTexture(const char* picturePath, SDL_Texture** destination) {
@@ -118,18 +248,130 @@ bool View::loadTexture(const char* picturePath, SDL_Texture** destination) {
   return valid;
 }
 
-static constexpr SDL_Color BLUE_BACKGROUND{65, 105, 225, 255};
-static constexpr SDL_Color HIDDEN_FOREGROUND{0, 20, 64, 255};
-static constexpr SDL_Color COFFEE_COLOR{44, 31, 22, 255};
-
-SDL_AppResult View::render(const Model& model) const {
-  if (model.isGameStarted()) [[likely]] {
+SDL_AppResult View::render(const Model& model) {
+  if (!model.isGameStarted()) [[likely]]
+    return drawLoadingScreen();
+  if (model.isGameStarted() && !model.isGameOver()) [[likely]] {
     return drawCurrentGameState(model);
+  } else if (model.isGameOver() && model.isGameLost()) {
+    return drawGameLost();
+  } else if (model.isGameOver() && model.isGameWon()) {
+    return drawGameWon(model);
   }
-  return drawLoadingScreen();
+  // should be unreachable
+  return SDL_APP_FAILURE;
 }
 
-SDL_AppResult View::drawLoadingScreen() const {
+SDL_AppResult View::drawGameLost() {
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!SDL_SetRenderDrawColor(renderer, BLUE_BACKGROUND.r, BLUE_BACKGROUND.g,
+                              BLUE_BACKGROUND.b, BLUE_BACKGROUND.a))
+      [[unlikely]] {
+#  ifdef LUMEN_LOG
+    spdlog::error("Could not set draw color {}. ", SDL_GetError());
+#  endif
+    return SDL_APP_FAILURE;
+  }
+#else
+  SDL_SetRenderDrawColor(renderer, BLUE_BACKGROUND.r, BLUE_BACKGROUND.g,
+                         BLUE_BACKGROUND.b, BLUE_BACKGROUND.a);
+#endif
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!SDL_RenderClear(renderer)) [[unlikely]] {
+
+#  ifdef LUMEN_LOG
+    spdlog::error("Could not set draw color {}. ", SDL_GetError());
+#  endif
+    return SDL_APP_FAILURE;
+  }
+#else
+  SDL_RenderClear(renderer);
+#endif
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!drawTexture(lostTextTexture, &lostTextPosition)) [[unlikely]] {
+    // already prints on its own
+    return SDL_APP_FAILURE;
+  }
+#else
+  drawTexture(lostTextTexture, &lostTextPosition);
+#endif
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!SDL_RenderPresent(renderer)) [[unlikely]] {
+#  ifdef LUMEN_LOG
+    spdlog::error("Could not render present the renderer {}. ", SDL_GetError());
+#  endif
+    return SDL_APP_FAILURE;
+  }
+#else
+  SDL_RenderPresent(renderer);
+#endif
+  return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult View::drawGameWon(const Model& model) {
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!SDL_SetRenderDrawColor(renderer, BLUE_BACKGROUND.r, BLUE_BACKGROUND.g,
+                              BLUE_BACKGROUND.b, BLUE_BACKGROUND.a))
+      [[unlikely]] {
+#  ifdef LUMEN_LOG
+    spdlog::error("Could not set draw color {}. ", SDL_GetError());
+#  endif
+    return SDL_APP_FAILURE;
+  }
+#else
+  SDL_SetRenderDrawColor(renderer, BLUE_BACKGROUND.r, BLUE_BACKGROUND.g,
+                         BLUE_BACKGROUND.b, BLUE_BACKGROUND.a);
+#endif
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!SDL_RenderClear(renderer)) [[unlikely]] {
+
+#  ifdef LUMEN_LOG
+    spdlog::error("Could not set draw color {}. ", SDL_GetError());
+#  endif
+    return SDL_APP_FAILURE;
+  }
+#else
+  SDL_RenderClear(renderer);
+#endif
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!drawTimer(model)) [[unlikely]] {
+    // already prints on its own
+    return SDL_APP_FAILURE;
+  }
+#else
+  drawTimer(model);
+#endif
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!drawTexture(wonTextTexture, &wonTextPosition)) [[unlikely]] {
+    // already prints on its own
+    return SDL_APP_FAILURE;
+  }
+#else
+  drawTexture(wonTextTexture, &wonTextPosition);
+#endif
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!SDL_RenderPresent(renderer)) [[unlikely]] {
+#  ifdef LUMEN_LOG
+    spdlog::error("Could not render present the renderer {}. ", SDL_GetError());
+#  endif
+    return SDL_APP_FAILURE;
+  }
+#else
+  SDL_RenderPresent(renderer);
+#endif
+  return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult View::drawLoadingScreen() {
 #ifdef LUMEN_STRICT_CHECKS
   if (!SDL_SetRenderDrawColor(renderer, BLUE_BACKGROUND.r, BLUE_BACKGROUND.g,
                               BLUE_BACKGROUND.b, BLUE_BACKGROUND.a))
@@ -165,6 +407,15 @@ SDL_AppResult View::drawLoadingScreen() const {
 
   if (!drawTexture(lumenTexture, &dst)) [[unlikely]]
     return SDL_APP_FAILURE;
+
+#ifdef LUMEN_STRICT_CHECKS
+  if (!drawTexture(introTextTexture, &introTextPosition)) [[unlikely]] {
+    // already prints on its own
+    return SDL_APP_FAILURE;
+  }
+#else
+  drawTexture(introTextTexture, &introTextPosition);
+#endif
 
 #ifdef LUMEN_STRICT_CHECKS
   if (!SDL_RenderPresent(renderer)) [[unlikely]] {
@@ -239,28 +490,17 @@ bool View::drawTiles(const Model& model) const {
 }
 
 bool View::drawTimer(const Model& model) const {
-  std::optional<Model::TimePoint> t{model.getStartTime()};
+  float maxBarHeight{static_cast<float>(9.0 / 10.0 * height)};
+  // prints if errors
+  float timerPercent{model.getTimerPercent()};
 #ifdef LUMEN_STRICT_CHECKS
-  if (!t) [[unlikely]] {
-#  ifdef LUMEN_LOG
-    spdlog::error(
-        "Invalid model state, game not started yet but requesting start time.");
-#  endif
+  if (timerPercent < 0 || timerPercent > 100)
     return false;
-  }
 #endif
-  Model::TimePoint startTime{t.value()};
-
-  int ms =
-      static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(
-                           Model::Clock::now() - startTime)
-                           .count());
-  float maxBarHeight{static_cast<float>(9.0/10.0*height)};
-  float barHeight{static_cast<float>(std::min(ms / MAX_TIME_MILLISECONDS, 1.0) *
-                                     9.0 / 10.0 * height)};
+  float barHeight{timerPercent * maxBarHeight / 100.0f};
   float x{static_cast<float>(4 * square_side + 5 * square_gap)},
-      y{static_cast<float>(height / 20.0 + maxBarHeight - barHeight)}, w{static_cast<float>(square_side)},
-      h{barHeight};
+      y{static_cast<float>(height / 20.0 + maxBarHeight - barHeight)},
+      w{static_cast<float>(square_side)}, h{barHeight};
   SDL_FRect rect{x, y, w, h};
   if (!SDL_SetRenderDrawColor(renderer, COFFEE_COLOR.r, COFFEE_COLOR.g,
                               COFFEE_COLOR.b, COFFEE_COLOR.a)) [[unlikely]] {
@@ -368,6 +608,38 @@ bool View::drawMachiatto(int row, int column) const {
 bool View::drawGreenTea(int row, int column) const {
   SDL_FRect rect{getSquareDrawingBox(row, column)};
   return drawTexture(greenTeaTexture, &rect);
+}
+
+std::optional<std::pair<int, int>> View::getTile(int x,
+                                                 [[maybe_unused]] int y) const {
+  int row{-1}, column{-1};
+  int removedOffset{square_gap}, xSteps{}, ySteps{};
+  while (x > 0) {
+    ++xSteps;
+    if (xSteps > 9)
+      return {};
+    x -= removedOffset;
+    removedOffset =
+        (removedOffset == square_gap) ? (square_side) : (square_gap);
+  }
+  if (xSteps % 2 == 0)
+    column = (xSteps - 1) / 2;
+  else
+    return {};
+  removedOffset = square_gap;
+  while (y > 0) {
+    ++ySteps;
+    if (ySteps > 7)
+      return {};
+    y -= removedOffset;
+    removedOffset =
+        (removedOffset == square_gap) ? (square_side) : (square_gap);
+  }
+  if (ySteps % 2 == 0)
+    row = (ySteps - 1) / 2;
+  else
+    return {};
+  return {{row, column}};
 }
 
 } // namespace LumenCappuccino

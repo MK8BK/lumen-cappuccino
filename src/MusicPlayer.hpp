@@ -22,7 +22,7 @@ private:
   MIX_Audio* successAudio;
   MIX_Audio* failureAudio;
   MIX_Audio* coffeeMachineAudio;
-  bool playAudio(MIX_Track* track, MIX_Audio* audio);
+  bool playAudio(MIX_Track* track, MIX_Audio* audio) const;
   bool loadAudio(const char* fileName, MIX_Audio** destination);
 
 public:
@@ -34,10 +34,10 @@ public:
   bool setup();
   void startPlaying(const std::string& soundName);
   void stopAllPlaying(const std::string& soundName);
-  bool playLoadingScreenAudio();
-  bool playCoffeeMachineAudio();
-  bool playFailureSound();
-  bool playSuccessSound();
+  bool playLoadingScreenAudio() const;
+  bool playCoffeeMachineAudio() const;
+  bool playFailureSound() const;
+  bool playSuccessSound() const;
   bool isValid() const;
   ~MusicPlayer();
 };

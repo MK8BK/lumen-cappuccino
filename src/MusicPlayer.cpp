@@ -75,7 +75,7 @@ bool MusicPlayer::loadAudio(const char* fileName, MIX_Audio** destination) {
 
 bool MusicPlayer::isValid() const { return valid; }
 
-bool MusicPlayer::playAudio(MIX_Track* track, MIX_Audio* audio) {
+bool MusicPlayer::playAudio(MIX_Track* track, MIX_Audio* audio) const {
 #ifdef LUMEN_STRICT_CHECKS
   if (!valid || !mixer || !track || !audio) [[unlikely]] {
 #  ifdef LUMEN_LOG
@@ -108,14 +108,19 @@ bool MusicPlayer::playAudio(MIX_Track* track, MIX_Audio* audio) {
 #endif
 }
 
-bool MusicPlayer::playLoadingScreenAudio() {
+bool MusicPlayer::playLoadingScreenAudio() const {
   return playAudio(backgroundTrack, loadingScreenAudio);
 }
 
-bool MusicPlayer::playCoffeeMachineAudio() {
+bool MusicPlayer::playCoffeeMachineAudio() const {
   return playAudio(backgroundTrack, coffeeMachineAudio);
 }
-bool MusicPlayer::playFailureSound() { return true; }
-bool MusicPlayer::playSuccessSound() { return true; }
+bool MusicPlayer::playFailureSound() const {
+  return playAudio(foregroundTrack, failureAudio);
+}
+
+bool MusicPlayer::playSuccessSound() const {
+  return playAudio(foregroundTrack, successAudio);
+}
 
 } // namespace LumenCappuccino
